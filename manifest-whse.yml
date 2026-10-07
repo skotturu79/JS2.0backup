@@ -1,0 +1,19 @@
+---
+applications:
+- name: warehouse-agent
+  memory: 512M
+  instances: 1
+  path: .
+  buildpacks:
+    - python_buildpack
+  command: gunicorn --worker-class uvicorn.workers.UvicornWorker --workers 1 --bind 0.0.0.0:${PORT} main:application
+  routes:
+    - route: whse-agent.cfapps.us10.hana.ondemand.com
+  env:
+    AICORE_DESTINATION_NAME: aicore
+    S4HANA_DESTINATION_NAME: S4X-100
+    DESTINATION_NAME: S4X-100
+    LOG_LEVEL: INFO
+  services:
+    - wh-destination-service
+    - wh-connectivity-service

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Joule Chat Widget — Test Page</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 60px auto; padding: 0 24px; color: #333; }
+    h1   { color: #0070F2; }
+    input, textarea { width: 100%; padding: 8px; margin: 4px 0 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    label { font-size: 13px; font-weight: 600; }
+    .tip  { background: #f0f4ff; border-left: 3px solid #0070F2; padding: 10px 14px; font-size: 13px; margin: 16px 0; border-radius: 0 4px 4px 0; }
+    code  { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+  <h1>Joule Widget — Test Page</h1>
+  <p>This page loads the widget with a <strong>mock agent</strong> that echoes your message and returns
+     a fake warehouse table. Use it to verify UI behaviour without a live backend.</p>
+
+  <div class="tip">
+    <strong>Keyboard shortcut:</strong> <code>Ctrl+Shift+J</code> to toggle the panel &nbsp;|&nbsp;
+    <code>Esc</code> to close &nbsp;|&nbsp; or click the blue button in the bottom-right corner.
+  </div>
+
+  <!-- Host-page content to verify no style bleed and no undo interference -->
+  <label>Host-page input (typing here should NOT trigger the shortcut or break undo):</label>
+  <input type="text" placeholder="Type freely — Ctrl+Z undo should work normally here">
+
+  <label>Host-page textarea:</label>
+  <textarea rows="3" placeholder="Shift+Enter, Ctrl+Z etc. must all work here"></textarea>
+
+  <p>Scroll this page, resize the window, and check that the panel slides in without
+     locking the background or adding an overlay.</p>
+
+  <!-- Lots of filler so we can verify the background stays scrollable -->
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.</p>
+  <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.</p>
+  <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+  <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim.</p>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.</p>
+  <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.</p>
+
+  <!-- ============================================================
+       Widget script
+       ============================================================ -->
+  <script src="joule-chat-widget.js"></script>
+  <script>
+    // ---- Mock agent responses ----
+    var MOCK_RESPONSES = {
+      stock: [
+        'Stock Overview — Plant BAR1\n',
+        '============================\n',
+        'Material    | SLoc | Unrestricted | QI  | Blocked\n',
+        '------------|------|-------------|-----|--------\n',
+        '1010005     | 1000 |       250   |  0  |   0\n',
+        '1010010     | 1000 |        80   | 10  |   5\n',
+        '1010012     | 1000 |       120   |  0  |   0\n',
+      ].join(''),
+
+      delivery: [
+        'Open Inbound Deliveries — Plant BAR1\n',
+        '=====================================\n',
+        'Delivery   | Vendor    | Items | Status\n',
+        '-----------|-----------|-------|-----------\n',
+        '180000992  | V-100001  |   3   | Not started\n',
+        '180000990  | V-100002  |   5   | Not started\n',
+      ].join(''),
+
+      task: [
+        'Warehouse Tasks — WH PBAR\n',
+        '==========================\n',
+        'Task    | Order   | Queue       | Status\n',
+        '--------|---------|-------------|--------\n',
+        '1001234 | 9000011 | INBOUND     | Open\n',
+        '1001235 | 9000012 | INBOUND     | In Progress\n',
+      ].join(''),
+
+      transfer: [
+        'STO Transfer Flow — BAR1 → ORM2\n',
+        '=================================\n',
+        'Step 1 — Create STO (ZIC2)\n',
+        '  STO Number      : 4800015099\n',
+        '  Supplying Plant : BAR1  →  Receiving Plant: ORM2\n',
+        '  Material        : 1010005   Qty: 50 KG\n\n',
+        'Step 2 — Goods Issue (mvt 351)\n',
+        '  Material Doc : 5000031234/2026  (stock in-transit)\n\n',
+        'Step 3 — Goods Receipt (mvt 101)\n',
+        '  Material Doc : 5000031235/2026  (stock received at ORM2)\n',
+      ].join(''),
+
+      default:
+        'I can help with:\n' +
+        '  • Stock levels      — try "show stock for 1010005"\n' +
+        '  • Inbound deliveries — try "open deliveries at BAR1"\n' +
+        '  • Warehouse tasks   — try "warehouse tasks for PBAR"\n' +
+        '  • Plant transfer    — try "transfer material between plants"\n' +
+        '  • Error demo        — try "trigger error"\n\n' +
+        '(This is a mock — connect onSendMessage to your real A2A endpoint.)'
+    };
+
+    // Simulates ~1 second network delay
+    function mockAgent(message) {
+      return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+          var m = message.toLowerCase();
+          if (m.indexOf('error') !== -1) {
+            reject(new Error('Simulated agent error — HTTP 503'));
+          } else if (m.indexOf('stock') !== -1 || m.indexOf('material') !== -1) {
+            resolve(MOCK_RESPONSES.stock);
+          } else if (m.indexOf('deliver') !== -1 || m.indexOf('inbound') !== -1) {
+            resolve(MOCK_RESPONSES.delivery);
+          } else if (m.indexOf('task') !== -1 || m.indexOf('order') !== -1) {
+            resolve(MOCK_RESPONSES.task);
+          } else if (m.indexOf('transfer') !== -1 || m.indexOf('sto') !== -1 || m.indexOf('plant') !== -1) {
+            resolve(MOCK_RESPONSES.transfer);
+          } else {
+            resolve(MOCK_RESPONSES.default);
+          }
+        }, 900);
+      });
+    }
+
+    // ---- Init widget ----
+    initJouleWidget({
+      onSendMessage: mockAgent,
+      position: 'bottom-right',
+      shortcut: { ctrlKey: true, shiftKey: true, key: 'j' },
+      quickActions: [
+        { label: 'Check stock',             message: 'Show stock for material 1010005 at plant BAR1' },
+        { label: 'Open deliveries',         message: 'Show open inbound deliveries at plant BAR1' },
+        { label: 'Warehouse tasks',         message: 'Show open warehouse tasks for warehouse PBAR' },
+        { label: 'Transfer between plants', message: 'Transfer 50 KG of material 1010005 from plant BAR1 storage location 1000 to plant ORM2 storage location 1000' }
+      ]
+      // logoUrl: '/assets/sap-logo.svg'   // uncomment to test a custom logo
+    });
+  </script>
+
+</body>
+</html>

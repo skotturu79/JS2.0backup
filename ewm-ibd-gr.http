@@ -1,0 +1,115 @@
+# EWM Warehouse Inbound Delivery (A2X, OData V4) — GR test harness
+# Extension: REST Client (humao.rest-client)
+# Fill values in .env (see ewm-ibd-gr.env.example). Run requests top-to-bottom.
+#
+# Full GR    = POST PostGoodsReceipt on the header with empty body.
+# Partial GR = PATCH item qty first, then POST the action (best: one $batch changeset).
+# HU GR      = not a released public action — see notes at bottom.
+
+@base = https://{{$dotenv HOST}}/sap/opu/odata4/sap/api_warehouseinbounddelivery/srvd_a2x/sap/warehouseinbounddelivery/0001
+@client = {{$dotenv SAP_CLIENT}}
+@auth = Basic {{$dotenv BASIC_AUTH_B64}}
+@ibd = {{$dotenv IBD_NUMBER}}
+
+### 0. Service document — sanity check auth/reachability
+GET {{base}}/?sap-client={{client}}
+Authorization: {{auth}}
+Accept: application/json
+
+### 1. $metadata — COPY the real action name + editable qty property from here
+GET {{base}}/$metadata?sap-client={{client}}
+Authorization: {{auth}}
+Accept: application/xml
+
+### 2. List open inbound deliveries (find one to test)
+GET {{base}}/WarehouseInboundDelivery?sap-client={{client}}&$top=20&$orderby=WarehouseInboundDelivery desc
+Authorization: {{auth}}
+Accept: application/json
+
+### 3. Read one delivery + its items (expand)
+GET {{base}}/WarehouseInboundDelivery('{{ibd}}')?sap-client={{client}}&$expand=_Item
+Authorization: {{auth}}
+Accept: application/json
+
+### 4. Fetch CSRF token + session cookies (reuse on every write below)
+# @name csrf
+GET {{base}}/WarehouseInboundDelivery('{{ibd}}')?sap-client={{client}}
+Authorization: {{auth}}
+Accept: application/json
+X-CSRF-Token: Fetch
+
+@token = {{csrf.response.headers.x-csrf-token}}
+@cookie = {{csrf.response.headers.set-cookie}}
+
+### 5a. FULL GR — bound action on the header, empty body
+# Replace SAP__self.PostGoodsReceipt with the exact qualified name from step 1 if different.
+POST {{base}}/WarehouseInboundDelivery('{{ibd}}')/SAP__self.PostGoodsReceipt?sap-client={{client}}
+Authorization: {{auth}}
+X-CSRF-Token: {{token}}
+Cookie: {{cookie}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### 5b. PARTIAL GR — step 1: PATCH the item's received/actual qty
+# Confirm the item key segment and the PATCHable qty property name from step 1 metadata.
+PATCH {{base}}/WarehouseInboundDeliveryItem(WarehouseInboundDelivery='{{ibd}}',WarehouseInboundDeliveryItem='10')?sap-client={{client}}
+Authorization: {{auth}}
+X-CSRF-Token: {{token}}
+Cookie: {{cookie}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "QuantityToPost": "5",
+  "QuantityToPostUnit": "KG"
+}
+
+### 5c. PARTIAL GR — step 2: post the action (header)
+POST {{base}}/WarehouseInboundDelivery('{{ibd}}')/SAP__self.PostGoodsReceipt?sap-client={{client}}
+Authorization: {{auth}}
+X-CSRF-Token: {{token}}
+Cookie: {{cookie}}
+Content-Type: application/json
+Accept: application/json
+
+{}
+
+### 6. RELIABLE PARTIAL — PATCH + action in ONE $batch changeset (atomic, ordered)
+# Use this if 5b/5c are rejected outside a batch (common for A2X V4).
+POST {{base}}/$batch?sap-client={{client}}
+Authorization: {{auth}}
+X-CSRF-Token: {{token}}
+Cookie: {{cookie}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "requests": [
+    {
+      "id": "1",
+      "method": "PATCH",
+      "url": "WarehouseInboundDeliveryItem(WarehouseInboundDelivery='{{ibd}}',WarehouseInboundDeliveryItem='10')",
+      "headers": { "Content-Type": "application/json" },
+      "body": { "QuantityToPost": "5", "QuantityToPostUnit": "KG" }
+    },
+    {
+      "id": "2",
+      "dependsOn": ["1"],
+      "method": "POST",
+      "url": "WarehouseInboundDelivery('{{ibd}}')/SAP__self.PostGoodsReceipt",
+      "headers": { "Content-Type": "application/json" },
+      "body": {}
+    }
+  ]
+}
+
+# ---------------------------------------------------------------------------
+# HU-BASED GR — no released public action on the inbound delivery.
+# Options:
+#   (a) Resolve the HU -> its delivery items, PATCH those items, then post (5b/5c or 6).
+#   (b) Custom RAP/SOAP wrapper over /SCWM/CL_API_FACTORY_DELIVERY ->
+#       /SCWM/IF_API_DELIVERY_IBD (released ABAP API, supports HU-level GR).
+# Property names above (QuantityToPost / item key) are PLACEHOLDERS — confirm from step 1.
+# ---------------------------------------------------------------------------
