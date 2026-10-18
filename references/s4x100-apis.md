@@ -38,9 +38,14 @@
 
 ## BTP Destination
 - **Destination name:** `S4X-100`
+- **Description:** S4X-100 GCLP
+- **Type:** HTTP
 - **Proxy type:** OnPremise (routes via BTP Connectivity / Cloud Connector)
-- **Port:** 8001 (OData port — confirmed working for material documents)
-- **Auth:** BasicAuthentication via destination credentials
+- **URL:** `http://s4x.uxm.sap.com:80`
+- **Proxy Protocol:** HTTP
+- **Location ID:** `UXM`
+- **Authentication:** BasicAuthentication
+- **User:** `UXARCHITECT`
 
 ## Demo Values
 - Material: `PROJVECTDEMO`

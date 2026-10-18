@@ -103,11 +103,17 @@ Registered in [`tools/__init__.py`](tools/__init__.py) via `build_domain_tools()
 
 ---
 
-## Joule Studio Integration
+## Agent Type — Custom A2A (not a Joule native agent)
 
-The skills above are also registered in **Joule Studio** (on the FGF tenant, where subscribed) as triggerable
-skills. Each `skills/<name>/SKILL.md` defines the description and sample utterances used for Joule intent
-matching.
+This is a **custom agent** built on the A2A protocol (JSON-RPC 2.0). It is **not** a SAP Joule native agent
+and does not require a Joule Studio login. Users interact with it directly via:
+- the Chat UI (`warehouse-agent-ui`)
+- the MCP proxy (`mcp_proxy/`) from Claude Code, Joule Desktop, or any MCP client
+
+Each `skills/<name>/SKILL.md` defines the skill description and sample utterances. These are loaded at agent
+startup as in-context instructions for intent routing — they are not Joule skill flows. The same description
+text can optionally be used if you register the A2A endpoint as an external action in Joule Studio, but that
+is not required for the agent to function.
 
 ---
 

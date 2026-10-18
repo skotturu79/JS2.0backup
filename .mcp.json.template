@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "mcp-abap-adt": {
+      "command": "mcp-abap-adt",
+      "args": [],
+      "env": {
+        "ABAP_SYSTEM_URL": "http://s4x.uxm.sap.com:80",
+        "ABAP_CLIENT":     "100",
+        "ABAP_USER":       "<your-SAP-user>",
+        "ABAP_PASSWORD":   "<your-SAP-password>"
+      }
+    },
+    "warehouse": {
+      "url": "http://localhost:8766/mcp"
+    }
+  }
+}

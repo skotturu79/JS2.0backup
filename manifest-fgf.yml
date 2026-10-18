@@ -11,9 +11,10 @@ applications:
     - route: warehouse-agent.cfapps.us10-001.hana.ondemand.com
   env:
     AICORE_DESTINATION_NAME: aicore
-    S4HANA_DESTINATION_NAME: SBPA_d4hclnt200
-    DESTINATION_NAME: SBPA_d4hclnt200
+    S4HANA_DESTINATION_NAME: FGF_S4HANA
+    DESTINATION_NAME: FGF_S4HANA
     AGENT_NAME: D4H-200
+    AGENT_LLM_MODEL: gpt-4.1
     LOG_LEVEL: INFO
   services:
     - whse-destination
