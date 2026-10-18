@@ -62,6 +62,39 @@ cp .mcp.json.template .mcp.json
 
 `.mcp.json` is gitignored (contains credentials). Once configured, Claude Code will automatically connect to S4X-100 when you open this repo.
 
+### 0.4 Joule Studio CLI
+
+Required for managing Joule Studio solutions, agents, skills, and MCP servers from the command line.
+
+```bash
+# Install (Node.js ≥ 18 required)
+npm install -g @sap/joule-studio-cli
+
+# Verify — two commands are installed:
+sapdas --version   # legacy CLI (lint, scenario testing)
+jl --version       # modern CLI (solutions, agents, skills, MCP, A2A)
+```
+
+Log in to the Joule Studio backend:
+
+```bash
+jl login https://manu-joule-studio-7i9npdqq.us10.build.cloud.sap
+# Session stored in ~/.joulestudio/credentials.json
+
+jl info            # confirm connected tenant + version
+```
+
+Key `jl` commands:
+
+| Command | Purpose |
+|---------|---------|
+| `jl solution list` | List solutions/projects in the tenant |
+| `jl skills list` | List skills in a solution |
+| `jl agent list` | List agents |
+| `jl mcp list` | List registered MCP servers |
+| `jl a2a` | Agent-to-agent communication |
+| `jl init` | Scaffold a new agent project locally |
+
 ---
 
 ## 1 · Source Repository
