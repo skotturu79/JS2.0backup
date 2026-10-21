@@ -2,7 +2,7 @@ apiVersion: solution.sap/v1
 kind: Solution
 metadata:
   name: warehouse-agent
-  version: 1.0.0
+  version: 1.0.1
   description: SAP EWM Warehouse Agent with LangGraph + AI Core
 assets:
   - ref: ./assets/warehouse-agent/asset.yaml

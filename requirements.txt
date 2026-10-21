@@ -1,4 +1,4 @@
-# Cloud Foundry requirements — used by Python buildpack
+# Joule Studio deployer requirements — v1.0.1 cache bust
 # sap-ai-sdk-gen removed: conflicts with langchain==1.3.9 + langgraph 1.2.5
 # (sap-ai-sdk-gen 6.x requires langchain~=1.2.x which is incompatible with
 #  langgraph 1.2.5's langchain-core>=1.4.7 constraint)

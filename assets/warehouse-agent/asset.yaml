@@ -3,7 +3,7 @@ kind: Asset
 
 metadata:
   name: warehouse-agent
-  version: 1.0.0
+  version: 1.0.1
   description: SAP EWM Warehouse Agent — stock, GI, GR, STO operations via LangGraph + AI Core
 
 type: agent
