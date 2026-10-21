@@ -44,7 +44,7 @@ THREAD_TTL_SECONDS = 3600
     description="The language model powering this agent",
 )
 def get_model_name() -> str:
-    return os.environ.get("AGENT_LLM_MODEL", "gpt-4o")
+    return "gpt-4o"
 
 
 @agent_config(
