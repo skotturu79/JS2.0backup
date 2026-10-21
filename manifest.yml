@@ -6,7 +6,7 @@ applications:
   path: .
   buildpacks:
     - python_buildpack
-  command: gunicorn --worker-class uvicorn.workers.UvicornWorker --workers 1 --bind 0.0.0.0:${PORT} main:application
+  command: gunicorn --worker-class uvicorn.workers.UvicornWorker --workers 1 --bind 0.0.0.0:${PORT} --chdir app main:application
   env:
     AICORE_DESTINATION_NAME: aicore
     S4HANA_DESTINATION_NAME: SBPA_d4hclnt200

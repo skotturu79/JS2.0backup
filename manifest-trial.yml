@@ -6,7 +6,7 @@ applications:
   path: .
   buildpacks:
     - python_buildpack
-  command: gunicorn --worker-class uvicorn.workers.UvicornWorker --workers 1 --bind 0.0.0.0:${PORT} main:application
+  command: gunicorn --worker-class uvicorn.workers.UvicornWorker --workers 1 --bind 0.0.0.0:${PORT} --chdir app main:application
   routes:
     - route: sm1801-warehouse-agent.cfapps.us10-001.hana.ondemand.com
   env:
