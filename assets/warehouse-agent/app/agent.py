@@ -12,21 +12,6 @@ from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import InMemorySaver
 from opentelemetry import trace
 
-try:
-    from sap_cloud_sdk.agent_decorators import agent_config, agent_model, prompt_section
-except ImportError:
-    def agent_model(**_kw):
-        def _d(fn): return fn
-        return _d
-
-    def agent_config(**_kw):
-        def _d(fn): return fn
-        return _d
-
-    def prompt_section(**_kw):
-        def _d(fn): return fn
-        return _d
-
 from aicore import init_llm_from_destination
 from s4hana_client import Client, DEFAULT_DESTINATION_NAME, _DestinationResolver
 from tools import build_domain_tools
@@ -38,30 +23,6 @@ tracer = trace.get_tracer(__name__)
 THREAD_TTL_SECONDS = 3600
 
 
-@agent_model(
-    key="config.model",
-    label="LLM Model",
-    description="The language model powering this agent",
-)
-def get_model_name() -> str:
-    return "qwen3.6-plus"
-
-
-@agent_config(
-    key="config.temperature",
-    label="LLM Temperature",
-    description="Controls randomness of responses (0.0 = deterministic, 1.0 = creative)",
-)
-def get_temperature() -> float:
-    return 0.0
-
-
-@prompt_section(
-    key="prompts.system",
-    label="System Prompt",
-    description="The full system prompt defining the agent's role and behavior",
-    validation={"format": "markdown", "max_length": 5000},
-)
 def get_system_prompt() -> str:
     return """You are an SAP S/4HANA Warehousing assistant specialised in Extended Warehouse Management (EWM),
 Inventory Management (MM-IM), and Logistics Execution (LE) on SAP S/4HANA.
