@@ -3,7 +3,7 @@ applications:
 - name: warehouse-agent
   memory: 512M
   instances: 1
-  path: .
+  path: assets/warehouse-agent
   buildpacks:
     - python_buildpack
   command: gunicorn --worker-class uvicorn.workers.UvicornWorker --workers 1 --bind 0.0.0.0:${PORT} --chdir app main:application
