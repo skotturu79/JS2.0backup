@@ -38,3 +38,7 @@ dev_jco_rfc.log
 # OS
 .DS_Store
 Thumbs.db
+
+# Joule Studio CLI
+.build
+build/

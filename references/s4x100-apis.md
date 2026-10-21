@@ -1,4 +1,4 @@
-# Active OData APIs — S4X-100 (gclp0353.devint.net.sap, client 100)
+# Active OData APIs — S4X-100 (s4x.uxm.sap.com, client 100)
 
 ## Confirmed Active Services
 

@@ -1,0 +1,40 @@
+apiVersion: asset.sap/v1
+kind: Asset
+
+metadata:
+  name: warehouse-agent
+  version: 1.0.0
+  description: SAP EWM Warehouse Agent — stock, GI, GR, STO operations via LangGraph + AI Core
+
+type: agent
+
+provides:
+  protocols:
+    - https
+  apis:
+    - kind: a2a
+      name: warehouse-agent
+      ordId: customer.sap:apiResource:warehouse-agent:v1
+
+container:
+  buildPath: .
+  port: 5000
+
+probes:
+  startup:
+    path: /.well-known/agent.json
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 18
+  liveness:
+    path: /.well-known/agent.json
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    path: /.well-known/agent.json
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
